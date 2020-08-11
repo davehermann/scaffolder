@@ -10,14 +10,16 @@ const inquirer = require("inquirer");
 const multi_level_logger_1 = require("multi-level-logger");
 class RootComposer {
     /**
-     * @param composerDirectory - Pass in __dirname from the composer
+     * @param composerDirectory - Pass in **__dirname** from the composer
      */
-    constructor(rootDir) {
-        this.rootDir = rootDir;
+    constructor(subclassDirectory) {
+        this.subclassDirectory = subclassDirectory;
+        if (!subclassDirectory)
+            throw `RootComposer requires subclasses to call super(__dirname)`;
         this.enabled = true;
     }
     /** Used to namespace variables */
-    get namespace() { return path.basename(this.rootDir); }
+    get namespace() { return path.basename(this.subclassDirectory); }
     /** Override to provide questions for the child composer */
     Questions({ answers }) {
         return [];
@@ -105,7 +107,7 @@ class RootComposer {
     async GetTemplateFiles({ answers, configuration }) {
         let templateFilenames = [];
         // Read the files within the path
-        const fsContents = await fs_utilities_1.ReadSubDirectories(this.rootDir);
+        const fsContents = await fs_utilities_1.ReadSubDirectories(this.subclassDirectory);
         // Find the templates
         const templateDir = fsContents.find(fsItem => (fsItem.fsName == `templates`));
         if (!!templateDir)
@@ -115,7 +117,7 @@ class RootComposer {
         while (templateFilenames.length > 0) {
             const filePath = templateFilenames.shift();
             // Read the file
-            const contents = await fs_1.promises.readFile(path.join(this.rootDir, `templates`, filePath), { encoding: `utf8` });
+            const contents = await fs_1.promises.readFile(path.join(this.subclassDirectory, `templates`, filePath), { encoding: `utf8` });
             templateFiles.set(this.InstallPath(filePath, { answers, configuration }), this.replaceTemplateTokens(contents, { answers, configuration }));
         }
         this.TemplateFileAdjustments(templateFiles, { answers, configuration });

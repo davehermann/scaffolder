@@ -12,9 +12,10 @@ import { IQuestion, IAnswer, IDependencyList, IAdditionalComposition, IOptions }
 
 abstract class RootComposer {
     /**
-     * @param composerDirectory - Pass in __dirname from the composer
+     * @param composerDirectory - Pass in **__dirname** from the composer
      */
-    constructor(readonly rootDir: string) {
+    constructor(readonly subclassDirectory: string) {
+        if (!subclassDirectory) throw `RootComposer requires subclasses to call super(__dirname)`;
         this.enabled = true;
     }
 
@@ -25,7 +26,7 @@ abstract class RootComposer {
     public automaticCommitMessage: string;
 
     /** Used to namespace variables */
-    public get namespace(): string { return path.basename(this.rootDir); }
+    public get namespace(): string { return path.basename(this.subclassDirectory); }
 
     /** Override to provide questions for the child composer */
     public Questions({ answers }: IOptions): Array<IQuestion> {
@@ -135,7 +136,7 @@ abstract class RootComposer {
         let templateFilenames: Array<string> = [];
 
         // Read the files within the path
-        const fsContents = await ReadSubDirectories(this.rootDir);
+        const fsContents = await ReadSubDirectories(this.subclassDirectory);
 
         // Find the templates
         const templateDir = fsContents.find(fsItem => (fsItem.fsName == `templates`));
@@ -150,7 +151,7 @@ abstract class RootComposer {
             const filePath = templateFilenames.shift();
 
             // Read the file
-            const contents = await fs.readFile(path.join(this.rootDir, `templates`, filePath), { encoding: `utf8` });
+            const contents = await fs.readFile(path.join(this.subclassDirectory, `templates`, filePath), { encoding: `utf8` });
 
             templateFiles.set(this.InstallPath(filePath, { answers, configuration }), this.replaceTemplateTokens(contents, { answers, configuration }));
         }

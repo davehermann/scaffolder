@@ -1,10 +1,10 @@
 import { IQuestion, IAnswer, IDependencyList, IAdditionalComposition, IOptions } from "./interfaces";
 declare abstract class RootComposer {
-    readonly rootDir: string;
+    readonly subclassDirectory: string;
     /**
-     * @param composerDirectory - Pass in __dirname from the composer
+     * @param composerDirectory - Pass in **__dirname** from the composer
      */
-    constructor(rootDir: string);
+    constructor(subclassDirectory: string);
     /** Is this composer enabled */
     enabled: boolean;
     /** Commit message when this completes (Leave as **undefined** for no Git commit) */
