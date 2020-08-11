@@ -63,29 +63,35 @@ async function getSubComposerDirectories(composerPath: string): Promise<Array<st
     return composerModules;
 }
 
+async function loadNamedComposerForPath(composerPath: string, composerName: string): Promise<IRegisteredComposer> {
+    const composerDirectories = await getSubComposerDirectories(composerPath);
+
+    if (composerDirectories.length > 0) {
+        // Each of the directories is a possible sub-composer
+        Dev({ composerDirectories });
+
+        // Find the named composer
+        const namedComposerPath = composerDirectories.find(directoryPath => (path.basename(directoryPath) == composerName));
+
+        if (!!namedComposerPath) {
+            // Load the main composer
+            const namedComposer = await loadComposer(namedComposerPath);
+
+            if (!!namedComposer)
+                return namedComposer;
+        }
+    }
+
+    return null;
+}
+
 /** Determine if a module is a Scaffolder composer */
 async function getMainComposer(composerPath: string): Promise<IRegisteredComposer> {
     // The module directory MUST be composer-*
     if (path.basename(composerPath).search(/^composer/) == 0) {
         Debug(`Checking ${composerPath}`);
 
-        const composerDirectories = await getSubComposerDirectories(composerPath);
-
-        if (composerDirectories.length > 0) {
-            // Each of the directories is a possible sub-composer
-            Dev({ composerDirectories });
-
-            // For this to be a composer, one directory MUST be "main"
-            const mainComposerPath = composerDirectories.find(directoryPath => (path.basename(directoryPath) == `main`));
-
-            if (!!mainComposerPath) {
-                // Load the main composer
-                const mainComposer = await loadComposer(mainComposerPath);
-
-                if (!!mainComposer)
-                    return mainComposer;
-            }
-        }
+        return loadNamedComposerForPath(composerPath, `main`);
     }
 
     return null;
@@ -121,4 +127,5 @@ async function readGlobalInstalls(): Promise<Array<IRegisteredComposer>> {
 
 export {
     readGlobalInstalls as GloballyInstalledComposers,
+    loadNamedComposerForPath as LoadNamedComposer,
 };

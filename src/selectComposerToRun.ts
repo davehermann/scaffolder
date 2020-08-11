@@ -24,6 +24,15 @@ async function displayPromptToUser(composerNames: Array<{ name: string, composer
 }
 
 /**
+ * Get the root path from a sub-composer
+ * @param composerPath - Path for a sub-composer
+ * */
+function getComposerRoot(composerPath: string): string {
+    const pathArrayForComposer = composerPath.split(path.sep);
+    return pathArrayForComposer.slice(0, pathArrayForComposer.length - 2).join(path.sep);
+}
+
+/**
  * Select composer to run either via user input or configuration
  * @param foundComposers - List of "Main" composers found on the system
  */
@@ -34,9 +43,7 @@ async function selectComposerToRun(foundComposers: Array<IRegisteredComposer>): 
 
     // Map the composer directory name to the composer object
     const composerNames = foundComposers.map(composer => {
-        const pathArrayForComposer = composer.path.split(path.sep),
-            pathToComposerRoot = pathArrayForComposer.slice(0, pathArrayForComposer.length - 2).join(path.sep);
-
+        const pathToComposerRoot = getComposerRoot(composer.path);
         Dev({ pathToComposerRoot });
 
         return { name: path.basename(pathToComposerRoot).replace(/^composer-/, ``), composer };
@@ -51,5 +58,6 @@ async function selectComposerToRun(foundComposers: Array<IRegisteredComposer>): 
 }
 
 export {
+    getComposerRoot as GetComposerRoot,
     selectComposerToRun as SelectComposer,
 };

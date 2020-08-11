@@ -5,14 +5,17 @@ import { Err, Dev } from "multi-level-logger";
 
 // Application Modules
 import { GloballyInstalledComposers } from "./findComposers";
+import { RunComposer } from "./runComposer";
 import { SelectComposer } from "./selectComposerToRun";
 
 
 async function initialize() {
     const foundComposers = await GloballyInstalledComposers();
 
-    const runComposer = await SelectComposer(foundComposers);
-    Dev({ runComposer });
+    const composerToRun = await SelectComposer(foundComposers);
+    Dev({ composerToRun });
+
+    await RunComposer(composerToRun);
 }
 
 initialize()

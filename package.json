@@ -13,6 +13,7 @@
   "author": "Dave Hermann",
   "dependencies": {
     "@davehermann/fs-utilities": "^0.3.4",
+    "@davehermann/process-spawner": "^0.3.0",
     "inquirer": "^7.3.3",
     "multi-level-logger": "^2.0.4"
   },

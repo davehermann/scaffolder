@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GloballyInstalledComposers = void 0;
+exports.LoadNamedComposer = exports.GloballyInstalledComposers = void 0;
 const fs_1 = require("fs");
 const path = require("path");
 const multi_level_logger_1 = require("multi-level-logger");
@@ -50,24 +50,29 @@ async function getSubComposerDirectories(composerPath) {
     }
     return composerModules;
 }
+async function loadNamedComposerForPath(composerPath, composerName) {
+    const composerDirectories = await getSubComposerDirectories(composerPath);
+    if (composerDirectories.length > 0) {
+        // Each of the directories is a possible sub-composer
+        multi_level_logger_1.Dev({ composerDirectories });
+        // Find the named composer
+        const namedComposerPath = composerDirectories.find(directoryPath => (path.basename(directoryPath) == composerName));
+        if (!!namedComposerPath) {
+            // Load the main composer
+            const namedComposer = await loadComposer(namedComposerPath);
+            if (!!namedComposer)
+                return namedComposer;
+        }
+    }
+    return null;
+}
+exports.LoadNamedComposer = loadNamedComposerForPath;
 /** Determine if a module is a Scaffolder composer */
 async function getMainComposer(composerPath) {
     // The module directory MUST be composer-*
     if (path.basename(composerPath).search(/^composer/) == 0) {
         multi_level_logger_1.Debug(`Checking ${composerPath}`);
-        const composerDirectories = await getSubComposerDirectories(composerPath);
-        if (composerDirectories.length > 0) {
-            // Each of the directories is a possible sub-composer
-            multi_level_logger_1.Dev({ composerDirectories });
-            // For this to be a composer, one directory MUST be "main"
-            const mainComposerPath = composerDirectories.find(directoryPath => (path.basename(directoryPath) == `main`));
-            if (!!mainComposerPath) {
-                // Load the main composer
-                const mainComposer = await loadComposer(mainComposerPath);
-                if (!!mainComposer)
-                    return mainComposer;
-            }
-        }
+        return loadNamedComposerForPath(composerPath, `main`);
     }
     return null;
 }

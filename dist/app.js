@@ -5,11 +5,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const multi_level_logger_1 = require("multi-level-logger");
 // Application Modules
 const findComposers_1 = require("./findComposers");
+const runComposer_1 = require("./runComposer");
 const selectComposerToRun_1 = require("./selectComposerToRun");
 async function initialize() {
     const foundComposers = await findComposers_1.GloballyInstalledComposers();
-    const runComposer = await selectComposerToRun_1.SelectComposer(foundComposers);
-    multi_level_logger_1.Dev({ runComposer });
+    const composerToRun = await selectComposerToRun_1.SelectComposer(foundComposers);
+    multi_level_logger_1.Dev({ composerToRun });
+    await runComposer_1.RunComposer(composerToRun);
 }
 initialize()
     .catch(err => {

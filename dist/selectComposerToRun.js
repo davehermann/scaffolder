@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SelectComposer = void 0;
+exports.SelectComposer = exports.GetComposerRoot = void 0;
 // Node Modules
 const path = require("path");
 // NPM Modules
@@ -18,6 +18,15 @@ async function displayPromptToUser(composerNames) {
     return composerNames.find(cN => (cN.name == answers.selectedComposer)).composer;
 }
 /**
+ * Get the root path from a sub-composer
+ * @param composerPath - Path for a sub-composer
+ * */
+function getComposerRoot(composerPath) {
+    const pathArrayForComposer = composerPath.split(path.sep);
+    return pathArrayForComposer.slice(0, pathArrayForComposer.length - 2).join(path.sep);
+}
+exports.GetComposerRoot = getComposerRoot;
+/**
  * Select composer to run either via user input or configuration
  * @param foundComposers - List of "Main" composers found on the system
  */
@@ -27,7 +36,7 @@ async function selectComposerToRun(foundComposers) {
         throw `No configured Composers found`;
     // Map the composer directory name to the composer object
     const composerNames = foundComposers.map(composer => {
-        const pathArrayForComposer = composer.path.split(path.sep), pathToComposerRoot = pathArrayForComposer.slice(0, pathArrayForComposer.length - 2).join(path.sep);
+        const pathToComposerRoot = getComposerRoot(composer.path);
         multi_level_logger_1.Dev({ pathToComposerRoot });
         return { name: path.basename(pathToComposerRoot).replace(/^composer-/, ``), composer };
     });
