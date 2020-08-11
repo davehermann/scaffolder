@@ -1,21 +1,12 @@
-interface IQuestion {
-    type: string;
-    name: string;
-    message?: string | ((answers: IAnswer) => string);
-    default?: string | ((answers: IAnswer) => string);
-    choices?: Array<IQuestionChoice>;
-    when?: (answers: IAnswer) => boolean;
-    validate?: (answer: string) => boolean;
-    filter?: (answer: string) => string;
-}
-
-interface IQuestionChoice {
-    name: string;
-    value: string;
-}
+import { RootComposer } from "./rootComposer";
 
 interface IAnswer {
     [x:string]: unknown;
+}
+
+interface IAdditionalComposition {
+    composerName: string;
+    data: IOptions;
 }
 
 interface IDependencyList {
@@ -28,9 +19,30 @@ interface IOptions {
     configuration?: any;
 }
 
-interface IAdditionalComposition {
-    composerName: string;
-    data: IOptions;
+interface IQuestion {
+    type: string;
+    name: string;
+    message?: string | ((answers: IAnswer) => string);
+    default?: string | ((answers: IAnswer) => string);
+    choices?: Array<IQuestionChoice> | Array<string> | Array<number>;
+    when?: (answers: IAnswer) => boolean;
+    validate?: (answer: string) => boolean;
+    filter?: (answer: string) => string;
+}
+
+interface IQuestionChoice {
+    name: string;
+    value: string;
+}
+
+/**
+ * DO NOT EXPORT
+ * @private
+ */
+interface IRegisteredComposer {
+    name: string;
+    path: string;
+    composer: RootComposer;
 }
 
 export {
@@ -40,4 +52,5 @@ export {
     IOptions,
     IQuestion,
     IQuestionChoice,
+    IRegisteredComposer,
 };
