@@ -70,7 +70,7 @@ class RootComposer {
                 const replacementId = fullId.substr(3, fullId.length - 6);
                 const [source, ...directives] = replacementId.split(`/`);
                 const [root, ...props] = source.split(`.`);
-                multi_level_logger_1.Dev({ source, directives, root, props });
+                multi_level_logger_1.Dev({ fullId, source, directives, root, props });
                 let value;
                 // Non-standard roots must be implemented in each composer
                 switch (root) {
@@ -91,15 +91,19 @@ class RootComposer {
                             if (!value)
                                 value = data;
                             break;
-                        case `substr`:
+                        case `lowercase`:
                             if (!!value)
-                                value = value.substr(+data);
+                                value = value.toLowerCase();
                             break;
                         case `replace`:
                             if (!!value) {
                                 const [original, update] = data.split(`;`);
                                 value = value.replace(original, update);
                             }
+                            break;
+                        case `substr`:
+                            if (!!value)
+                                value = value.substr(+data);
                             break;
                     }
                 });

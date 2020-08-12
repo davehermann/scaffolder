@@ -26,8 +26,9 @@ interface IQuestion {
     default?: string | ((answers: IAnswer) => string);
     choices?: Array<IQuestionChoice> | Array<string> | Array<number>;
     when?: (answers: IAnswer) => boolean;
-    validate?: (answer: string) => boolean;
+    validate?: (answer: string) => boolean | string;
     filter?: (answer: string) => string;
+    suffix?: string;
 }
 
 interface IQuestionChoice {
