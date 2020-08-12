@@ -25,8 +25,8 @@ abstract class RootComposer {
     /** Commit message when this completes (Leave as **undefined** for no Git commit) */
     public automaticCommitMessage: string;
 
-    /** Used to namespace variables */
-    public get namespace(): string { return path.basename(this.subclassDirectory); }
+    /** This composer configures other composers, and does not compose templates */
+    public passthroughOnly = false;
 
     /** Override to provide questions for the child composer */
     public Questions({ answers }: IOptions): Array<IQuestion> {
@@ -45,9 +45,13 @@ abstract class RootComposer {
         return null;
     }
 
-    /** Override to provide configuration settings */
+    /**
+     * Override to provide configuration settings
+     *   - Set **configuration.installDestination** in your main composer to your newly created path
+     */
     public SetConfiguration({ answers, configuration }: IOptions): void {
-        return null;
+        if (!configuration.installDestination  && !this.passthroughOnly)
+            throw `configuration.installDestination must be specified in a SetConfiguration() override in your composer`;
     }
 
     /** Override to inject directory structure or file renaming into the path */
@@ -59,7 +63,7 @@ abstract class RootComposer {
         // Load the file into the templates
         if (!existingTemplates.has(filePath)) {
             // Read the existing file
-            const contents = await fs.readFile(path.join(configuration.rootDirectory, filePath), { encoding: `utf8` });
+            const contents = await fs.readFile(path.join(configuration.installDestination, filePath), { encoding: `utf8` });
             existingTemplates.set(filePath, contents);
         }
     }

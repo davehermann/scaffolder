@@ -9,13 +9,16 @@ declare abstract class RootComposer {
     enabled: boolean;
     /** Commit message when this completes (Leave as **undefined** for no Git commit) */
     automaticCommitMessage: string;
-    /** Used to namespace variables */
-    get namespace(): string;
+    /** This composer configures other composers, and does not compose templates */
+    passthroughOnly: boolean;
     /** Override to provide questions for the child composer */
     Questions({ answers }: IOptions): Array<IQuestion>;
     /** Display any questions for this composer to the user */
     AskQuestions({ answers }: IOptions): Promise<IAnswer>;
-    /** Override to provide configuration settings */
+    /**
+     * Override to provide configuration settings
+     *   - Set **configuration.installDestination** in your main composer to your newly created path
+     */
     SetConfiguration({ answers, configuration }: IOptions): void;
     /** Override to inject directory structure or file renaming into the path */
     InstallPath(filePath: string, { answers, configuration }: IOptions): string;

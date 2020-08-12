@@ -14,12 +14,12 @@ class RootComposer {
      */
     constructor(subclassDirectory) {
         this.subclassDirectory = subclassDirectory;
+        /** This composer configures other composers, and does not compose templates */
+        this.passthroughOnly = false;
         if (!subclassDirectory)
             throw `RootComposer requires subclasses to call super(__dirname)`;
         this.enabled = true;
     }
-    /** Used to namespace variables */
-    get namespace() { return path.basename(this.subclassDirectory); }
     /** Override to provide questions for the child composer */
     Questions({ answers }) {
         return [];
@@ -33,9 +33,13 @@ class RootComposer {
         }
         return null;
     }
-    /** Override to provide configuration settings */
+    /**
+     * Override to provide configuration settings
+     *   - Set **configuration.installDestination** in your main composer to your newly created path
+     */
     SetConfiguration({ answers, configuration }) {
-        return null;
+        if (!configuration.installDestination && !this.passthroughOnly)
+            throw `configuration.installDestination must be specified in a SetConfiguration() override in your composer`;
     }
     /** Override to inject directory structure or file renaming into the path */
     InstallPath(filePath, { answers, configuration }) {
@@ -45,7 +49,7 @@ class RootComposer {
         // Load the file into the templates
         if (!existingTemplates.has(filePath)) {
             // Read the existing file
-            const contents = await fs_1.promises.readFile(path.join(configuration.rootDirectory, filePath), { encoding: `utf8` });
+            const contents = await fs_1.promises.readFile(path.join(configuration.installDestination, filePath), { encoding: `utf8` });
             existingTemplates.set(filePath, contents);
         }
     }

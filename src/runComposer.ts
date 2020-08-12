@@ -19,7 +19,7 @@ const RUNTIME_CONFIGURATION = {
 };
 
 async function handleChildProcess(commands: Array<string>, { answers, configuration }: IOptions): Promise<string> {
-    const spawnedProcess = await SpawnProcess(commands, { cwd: configuration.rootDirectory }, { consolePassthrough: true });
+    const spawnedProcess = await SpawnProcess(commands, { cwd: configuration.installDestination }, { consolePassthrough: true });
 
     const data: Promise<string> = new Promise((resolve, reject) => {
         let content = ``,
@@ -69,7 +69,7 @@ async function dependencyInstallation(composer: RootComposer, { answers, configu
 
 async function writeFiles(templateFiles: Map<string, string>, { configuration }: IOptions): Promise<void> {
     for (const [relativeFilePath, contents] of templateFiles.entries()) {
-        const filePath = path.join(configuration.rootDirectory, relativeFilePath);
+        const filePath = path.join(configuration.installDestination, relativeFilePath);
 
         await EnsurePathForFile(filePath);
         Log(`Adding ${relativeFilePath}`, { configuration: { includeCodeLocation: false } });
@@ -126,23 +126,26 @@ async function scaffolder(composer: IRegisteredComposer, { answers, configuratio
     composer.composer.SetConfiguration({ answers, configuration });
     Debug({ configuration });
 
-    // Get composer templates
-    const composerTemplates: Map<string, string> = await composer.composer.GetTemplateFiles({ answers, configuration });
-    await composer.composer.FileChanges(composerTemplates, { answers, configuration });
-    for (const [path, contents] of composerTemplates.entries())
-        Debug({ path, contents });
+    // Skip template processing/writing, dependency installation, and git commit if this is a passthrough composer
+    if (!composer.composer.passthroughOnly) {
+        // Get composer templates
+        const composerTemplates: Map<string, string> = await composer.composer.GetTemplateFiles({ answers, configuration });
+        await composer.composer.FileChanges(composerTemplates, { answers, configuration });
+        for (const [path, contents] of composerTemplates.entries())
+            Debug({ path, contents });
 
-    // Write files
-    await writeFiles(composerTemplates, { configuration });
+        // Write files
+        await writeFiles(composerTemplates, { configuration });
 
-    // Install dependencies
-    await dependencyInstallation(composer.composer, { answers, configuration });
+        // Install dependencies
+        await dependencyInstallation(composer.composer, { answers, configuration });
+    }
 
     // Run any additional composers
     await runAnySuccessiveComposers(composer, { answers, configuration });
 
     // Commit to Git source control
-    if (!!composer.composer.automaticCommitMessage && RUNTIME_CONFIGURATION.addToGit) {
+    if (!!composer.composer.automaticCommitMessage && RUNTIME_CONFIGURATION.addToGit && !composer.composer.passthroughOnly) {
         await handleChildProcess([`git`, `init`], { answers, configuration });
         await handleChildProcess([`git`, `add`, `.`], { answers, configuration });
         await handleChildProcess([`git`, `commit`, `-m`, `"${composer.composer.automaticCommitMessage}"`], { answers, configuration });
