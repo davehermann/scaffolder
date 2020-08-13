@@ -64,6 +64,22 @@ abstract class RootComposer {
         }
     }
 
+    /**
+     * Utility to drop templates
+     * @param filesToRemove - file names will be automatically passed through **InstallPath** if not directly in template map
+     */
+    protected RemoveFromTemplates(filesToRemove: string | Array<string>, existingTemplates: Map<string, string>, { answers, configuration }: IOptions): void {
+        if (typeof filesToRemove == `string`)
+            filesToRemove = [filesToRemove];
+
+        filesToRemove.forEach(filePath => {
+            // Pass through InstallPath if the file path isn't found
+            if (!existingTemplates.has(filePath))
+                filePath = this.InstallPath(filePath, { answers, configuration });
+            existingTemplates.delete(filePath);
+        });
+    }
+
     private getDirectoryFiles(directoryRoot: IDirectoryObject, foundFiles: Array<string> = []): Array<string> {
         while (directoryRoot.items.length > 0) {
             const nextItem = directoryRoot.items.shift();
@@ -161,16 +177,13 @@ abstract class RootComposer {
             templateFiles.set(this.InstallPath(filePath, { answers, configuration }), this.replaceTemplateTokens(contents, { answers, configuration }));
         }
 
-        this.TemplateFileAdjustments(templateFiles, { answers, configuration });
+        await this.TemplateFileAdjustments(templateFiles, { answers, configuration });
 
         return templateFiles;
     }
 
-    public TemplateFileAdjustments(templates: Map<string, string>, { answers, configuration }: IOptions): void {
-        return null;
-    }
-
-    public async FileChanges(existingTemplates: Map<string, string>, { answers, configuration }: IOptions): Promise<void> {
+    /** Modify loaded templates, and load/remove from templates */
+    public async TemplateFileAdjustments(existingTemplates: Map<string, string>, { answers, configuration }: IOptions): Promise<void> {
         return null;
     }
 

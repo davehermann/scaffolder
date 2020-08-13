@@ -47,7 +47,7 @@ async function dependencyInstallation(composer, { answers, configuration }) {
         if (!!runtime || !!development)
             multi_level_logger_1.Log(`Installing Dependencies`, { configuration: { includeCodeLocation: false } });
         else
-            multi_level_logger_1.Log(`No dependencies required`);
+            multi_level_logger_1.Log(`No dependencies required`, { configuration: { includeCodeLocation: false } });
         if (!!runtime)
             await handleChildProcess([`npm`, `install`, ...runtime], { answers, configuration });
         if (!!development)
@@ -67,8 +67,8 @@ async function writeFiles(templateFiles, { configuration }) {
 async function runAnySuccessiveComposers(composer, { answers, configuration }) {
     const additionalComposers = composer.composer.AdditionalCompositions({ answers, configuration });
     if (additionalComposers.length > 0) {
-        multi_level_logger_1.Log(`Running additional composers (${additionalComposers.length} found)`);
         for (const { composerName, data } of additionalComposers) {
+            multi_level_logger_1.Log(`Running additional composer for ${composer.name} (${additionalComposers.length} remaining)`, { configuration: { includeCodeLocation: false } });
             const peerComposer = await findComposers_1.LoadNamedComposer(selectComposerToRun_1.GetComposerRoot(composer.path), composerName);
             if (!peerComposer)
                 throw `No composer named "${composerName}" was found as a peer of "${composer.name}" composer (${composer.path})`;
@@ -105,7 +105,6 @@ async function scaffolder(composer, { answers, configuration } = { answers: null
     if (!composer.composer.passthroughOnly) {
         // Get composer templates
         const composerTemplates = await composer.composer.GetTemplateFiles({ answers, configuration });
-        await composer.composer.FileChanges(composerTemplates, { answers, configuration });
         for (const [path, contents] of composerTemplates.entries())
             multi_level_logger_1.Debug({ path, contents });
         // Write files

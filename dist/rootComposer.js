@@ -50,6 +50,20 @@ class RootComposer {
             existingTemplates.set(filePath, contents);
         }
     }
+    /**
+     * Utility to drop templates
+     * @param filesToRemove - file names will be automatically passed through **InstallPath** if not directly in template map
+     */
+    RemoveFromTemplates(filesToRemove, existingTemplates, { answers, configuration }) {
+        if (typeof filesToRemove == `string`)
+            filesToRemove = [filesToRemove];
+        filesToRemove.forEach(filePath => {
+            // Pass through InstallPath if the file path isn't found
+            if (!existingTemplates.has(filePath))
+                filePath = this.InstallPath(filePath, { answers, configuration });
+            existingTemplates.delete(filePath);
+        });
+    }
     getDirectoryFiles(directoryRoot, foundFiles = []) {
         while (directoryRoot.items.length > 0) {
             const nextItem = directoryRoot.items.shift();
@@ -125,13 +139,11 @@ class RootComposer {
             const contents = await fs_1.promises.readFile(path.join(this.subclassDirectory, `templates`, filePath), { encoding: `utf8` });
             templateFiles.set(this.InstallPath(filePath, { answers, configuration }), this.replaceTemplateTokens(contents, { answers, configuration }));
         }
-        this.TemplateFileAdjustments(templateFiles, { answers, configuration });
+        await this.TemplateFileAdjustments(templateFiles, { answers, configuration });
         return templateFiles;
     }
-    TemplateFileAdjustments(templates, { answers, configuration }) {
-        return null;
-    }
-    async FileChanges(existingTemplates, { answers, configuration }) {
+    /** Modify loaded templates, and load/remove from templates */
+    async TemplateFileAdjustments(existingTemplates, { answers, configuration }) {
         return null;
     }
     InstallDependencies({ answers, configuration }) {

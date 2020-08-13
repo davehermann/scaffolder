@@ -24,11 +24,16 @@ declare abstract class RootComposer {
     /** Override to inject directory structure or file renaming into the path */
     InstallPath(filePath: string, { answers, configuration }: IOptions): string;
     protected AddFileOnDiskToTemplates(filePath: string, existingTemplates: Map<string, string>, { configuration }: IOptions): Promise<void>;
+    /**
+     * Utility to drop templates
+     * @param filesToRemove - file names will be automatically passed through **InstallPath** if not directly in template map
+     */
+    protected RemoveFromTemplates(filesToRemove: string | Array<string>, existingTemplates: Map<string, string>, { answers, configuration }: IOptions): void;
     private getDirectoryFiles;
     private replaceTemplateTokens;
     GetTemplateFiles({ answers, configuration }: IOptions): Promise<Map<string, string>>;
-    TemplateFileAdjustments(templates: Map<string, string>, { answers, configuration }: IOptions): void;
-    FileChanges(existingTemplates: Map<string, string>, { answers, configuration }: IOptions): Promise<void>;
+    /** Modify loaded templates, and load/remove from templates */
+    TemplateFileAdjustments(existingTemplates: Map<string, string>, { answers, configuration }: IOptions): Promise<void>;
     InstallDependencies({ answers, configuration }: IOptions): IDependencyList;
     AdditionalCompositions({ answers, configuration }: IOptions): Array<IAdditionalComposition>;
 }

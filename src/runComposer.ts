@@ -56,7 +56,7 @@ async function dependencyInstallation(composer: RootComposer, { answers, configu
         if (!!runtime || !!development)
             Log(`Installing Dependencies`, { configuration: { includeCodeLocation: false } });
         else
-            Log(`No dependencies required`);
+            Log(`No dependencies required`, { configuration: { includeCodeLocation: false } });
 
         if (!!runtime)
             await handleChildProcess([`npm`, `install`, ...runtime], { answers, configuration });
@@ -81,9 +81,9 @@ async function runAnySuccessiveComposers(composer: IRegisteredComposer, { answer
     const additionalComposers = composer.composer.AdditionalCompositions({ answers, configuration });
 
     if (additionalComposers.length > 0) {
-        Log(`Running additional composers (${additionalComposers.length} found)`);
-
         for (const { composerName, data } of additionalComposers) {
+            Log(`Running additional composer for ${composer.name} (${additionalComposers.length} remaining)`, { configuration: { includeCodeLocation: false } });
+
             const peerComposer = await LoadNamedComposer(GetComposerRoot(composer.path), composerName);
 
             if (!peerComposer)
@@ -130,7 +130,6 @@ async function scaffolder(composer: IRegisteredComposer, { answers, configuratio
     if (!composer.composer.passthroughOnly) {
         // Get composer templates
         const composerTemplates: Map<string, string> = await composer.composer.GetTemplateFiles({ answers, configuration });
-        await composer.composer.FileChanges(composerTemplates, { answers, configuration });
         for (const [path, contents] of composerTemplates.entries())
             Debug({ path, contents });
 
