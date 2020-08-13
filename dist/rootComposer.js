@@ -8,6 +8,8 @@ const path = require("path");
 const fs_utilities_1 = require("@davehermann/fs-utilities");
 const inquirer = require("inquirer");
 const multi_level_logger_1 = require("multi-level-logger");
+const textextensions_1 = require("textextensions");
+const binaryextensions_1 = require("binaryextensions");
 class RootComposer {
     /**
      * @param composerDirectory - Pass in **__dirname** from the composer
@@ -123,6 +125,19 @@ class RootComposer {
             });
         return fileContents;
     }
+    isBinaryFile(filePath) {
+        const extension = path.extname(filePath);
+        // A dot file (e.g. .gitignore) or no extension will have no length
+        // Assume as text file
+        if (extension.length == 0)
+            return false;
+        if (binaryextensions_1.default.indexOf(extension.substr(1)) >= 0)
+            return true;
+        if (textextensions_1.default.indexOf(extension.substr(1)) >= 0)
+            return false;
+        // Default to null for anything that can't be determined
+        return null;
+    }
     async GetTemplateFiles({ answers, configuration }) {
         let templateFilenames = [];
         // Read the files within the path
@@ -136,7 +151,10 @@ class RootComposer {
         while (templateFilenames.length > 0) {
             const filePath = templateFilenames.shift();
             // Read the file
-            const contents = await fs_1.promises.readFile(path.join(this.subclassDirectory, `templates`, filePath), { encoding: `utf8` });
+            const fullPathToFile = path.join(this.subclassDirectory, `templates`, filePath);
+            const isBinaryFile = this.isBinaryFile(fullPathToFile);
+            // For now, read all non-binary as utf8, including indeterminates
+            const contents = await fs_1.promises.readFile(fullPathToFile, { encoding: isBinaryFile ? `base64` : `utf8` });
             templateFiles.set(this.InstallPath(filePath, { answers, configuration }), this.replaceTemplateTokens(contents, { answers, configuration }));
         }
         await this.TemplateFileAdjustments(templateFiles, { answers, configuration });

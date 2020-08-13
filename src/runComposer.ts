@@ -67,13 +67,17 @@ async function dependencyInstallation(composer: RootComposer, { answers, configu
         Log(`Skipping Dependency Installation`, { configuration: { includeCodeLocation: false } });
 }
 
-async function writeFiles(templateFiles: Map<string, string>, { configuration }: IOptions): Promise<void> {
+async function writeFiles(composer: RootComposer, templateFiles: Map<string, string>, { configuration }: IOptions): Promise<void> {
     for (const [relativeFilePath, contents] of templateFiles.entries()) {
         const filePath = path.join(configuration.installDestination, relativeFilePath);
 
         await EnsurePathForFile(filePath);
         Log(`Adding ${relativeFilePath}`, { configuration: { includeCodeLocation: false } });
-        await fs.writeFile(filePath, contents, { encoding: `utf8` });
+
+        // Check the file type
+        const isBinaryFile = composer.isBinaryFile(filePath);
+        // Handle as RootComposer handles file reads: from base64
+        await fs.writeFile(filePath, contents, { encoding: isBinaryFile ? `base64` : `utf8` });
     }
 }
 
@@ -134,7 +138,7 @@ async function scaffolder(composer: IRegisteredComposer, { answers, configuratio
             Debug({ path, contents });
 
         // Write files
-        await writeFiles(composerTemplates, { configuration });
+        await writeFiles(composer.composer, composerTemplates, { configuration });
 
         // Install dependencies
         await dependencyInstallation(composer.composer, { answers, configuration });

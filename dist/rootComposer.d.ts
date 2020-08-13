@@ -31,6 +31,7 @@ declare abstract class RootComposer {
     protected RemoveFromTemplates(filesToRemove: string | Array<string>, existingTemplates: Map<string, string>, { answers, configuration }: IOptions): void;
     private getDirectoryFiles;
     private replaceTemplateTokens;
+    isBinaryFile(filePath: string): boolean;
     GetTemplateFiles({ answers, configuration }: IOptions): Promise<Map<string, string>>;
     /** Modify loaded templates, and load/remove from templates */
     TemplateFileAdjustments(existingTemplates: Map<string, string>, { answers, configuration }: IOptions): Promise<void>;

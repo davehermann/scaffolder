@@ -56,12 +56,15 @@ async function dependencyInstallation(composer, { answers, configuration }) {
     else
         multi_level_logger_1.Log(`Skipping Dependency Installation`, { configuration: { includeCodeLocation: false } });
 }
-async function writeFiles(templateFiles, { configuration }) {
+async function writeFiles(composer, templateFiles, { configuration }) {
     for (const [relativeFilePath, contents] of templateFiles.entries()) {
         const filePath = path.join(configuration.installDestination, relativeFilePath);
         await fs_utilities_1.EnsurePathForFile(filePath);
         multi_level_logger_1.Log(`Adding ${relativeFilePath}`, { configuration: { includeCodeLocation: false } });
-        await fs_1.promises.writeFile(filePath, contents, { encoding: `utf8` });
+        // Check the file type
+        const isBinaryFile = composer.isBinaryFile(filePath);
+        // Handle as RootComposer handles file reads
+        await fs_1.promises.writeFile(filePath, contents, { encoding: isBinaryFile ? `base64` : `utf8` });
     }
 }
 async function runAnySuccessiveComposers(composer, { answers, configuration }) {
@@ -108,7 +111,7 @@ async function scaffolder(composer, { answers, configuration } = { answers: null
         for (const [path, contents] of composerTemplates.entries())
             multi_level_logger_1.Debug({ path, contents });
         // Write files
-        await writeFiles(composerTemplates, { configuration });
+        await writeFiles(composer.composer, composerTemplates, { configuration });
         // Install dependencies
         await dependencyInstallation(composer.composer, { answers, configuration });
     }

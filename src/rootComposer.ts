@@ -6,6 +6,8 @@ import * as path from "path";
 import { IDirectoryObject, ReadSubDirectories } from "@davehermann/fs-utilities";
 import * as inquirer from "inquirer";
 import { Dev } from "multi-level-logger";
+import textExtensions from "textextensions";
+import binaryExtensions from "binaryextensions";
 
 // Application Modules
 import { IDependencyList, IAdditionalComposition, IOptions } from "./interfaces";
@@ -153,6 +155,24 @@ abstract class RootComposer {
         return fileContents;
     }
 
+    public isBinaryFile(filePath: string): boolean {
+        const extension = path.extname(filePath);
+
+        // A dot file (e.g. .gitignore) or no extension will have no length
+        // Assume as text file
+        if (extension.length == 0)
+            return false;
+
+        if (binaryExtensions.indexOf(extension.substr(1)) >= 0)
+            return true;
+
+        if (textExtensions.indexOf(extension.substr(1)) >= 0)
+            return false;
+
+        // Default to null for anything that can't be determined
+        return null;
+    }
+
     public async GetTemplateFiles({ answers, configuration }: IOptions): Promise<Map<string, string>> {
         let templateFilenames: Array<string> = [];
 
@@ -172,7 +192,10 @@ abstract class RootComposer {
             const filePath = templateFilenames.shift();
 
             // Read the file
-            const contents = await fs.readFile(path.join(this.subclassDirectory, `templates`, filePath), { encoding: `utf8` });
+            const fullPathToFile = path.join(this.subclassDirectory, `templates`, filePath);
+            const isBinaryFile = this.isBinaryFile(fullPathToFile);
+            // For now, read all non-binary as utf8, including indeterminates
+            const contents = await fs.readFile(fullPathToFile, { encoding: isBinaryFile ? `base64` : `utf8` });
 
             templateFiles.set(this.InstallPath(filePath, { answers, configuration }), this.replaceTemplateTokens(contents, { answers, configuration }));
         }
