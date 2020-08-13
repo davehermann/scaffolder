@@ -1,7 +1,8 @@
 import { RootComposer } from "./rootComposer";
+import * as inquirer from "inquirer";
 
-interface IAnswer {
-    [x:string]: unknown;
+interface IAnswerCollection {
+    [x:string]: inquirer.Answers;
 }
 
 interface IAdditionalComposition {
@@ -15,25 +16,8 @@ interface IDependencyList {
 }
 
 interface IOptions {
-    answers?: any;
+    answers?: IAnswerCollection;
     configuration?: any;
-}
-
-interface IQuestion {
-    type: string;
-    name: string;
-    message?: string | ((answers: IAnswer) => string);
-    default?: string | ((answers: IAnswer) => string);
-    choices?: Array<IQuestionChoice> | Array<string> | Array<number>;
-    when?: (answers: IAnswer) => boolean;
-    validate?: (answer: string) => boolean | string;
-    filter?: (answer: string) => string;
-    suffix?: string;
-}
-
-interface IQuestionChoice {
-    name: string;
-    value: string;
 }
 
 /**
@@ -48,10 +32,8 @@ interface IRegisteredComposer {
 
 export {
     IAdditionalComposition,
-    IAnswer,
+    IAnswerCollection,
     IDependencyList,
     IOptions,
-    IQuestion,
-    IQuestionChoice,
     IRegisteredComposer,
 };

@@ -1,6 +1,7 @@
 import { RootComposer } from "./rootComposer";
-interface IAnswer {
-    [x: string]: unknown;
+import * as inquirer from "inquirer";
+interface IAnswerCollection {
+    [x: string]: inquirer.Answers;
 }
 interface IAdditionalComposition {
     composerName: string;
@@ -11,23 +12,8 @@ interface IDependencyList {
     development: Array<string>;
 }
 interface IOptions {
-    answers?: any;
+    answers?: IAnswerCollection;
     configuration?: any;
-}
-interface IQuestion {
-    type: string;
-    name: string;
-    message?: string | ((answers: IAnswer) => string);
-    default?: string | ((answers: IAnswer) => string);
-    choices?: Array<IQuestionChoice> | Array<string> | Array<number>;
-    when?: (answers: IAnswer) => boolean;
-    validate?: (answer: string) => boolean | string;
-    filter?: (answer: string) => string;
-    suffix?: string;
-}
-interface IQuestionChoice {
-    name: string;
-    value: string;
 }
 /**
  * DO NOT EXPORT
@@ -38,4 +24,4 @@ interface IRegisteredComposer {
     path: string;
     composer: RootComposer;
 }
-export { IAdditionalComposition, IAnswer, IDependencyList, IOptions, IQuestion, IQuestionChoice, IRegisteredComposer, };
+export { IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions, IRegisteredComposer, };

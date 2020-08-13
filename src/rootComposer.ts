@@ -8,7 +8,7 @@ import * as inquirer from "inquirer";
 import { Dev } from "multi-level-logger";
 
 // Application Modules
-import { IQuestion, IAnswer, IDependencyList, IAdditionalComposition, IOptions } from "./interfaces";
+import { IDependencyList, IAdditionalComposition, IOptions } from "./interfaces";
 
 abstract class RootComposer {
     /**
@@ -29,20 +29,16 @@ abstract class RootComposer {
     public passthroughOnly = false;
 
     /** Override to provide questions for the child composer */
-    public Questions({ answers }: IOptions): Array<IQuestion> {
+    public Questions({ answers }: IOptions): inquirer.QuestionCollection {
         return [];
     }
 
     /** Display any questions for this composer to the user */
-    public async AskQuestions({ answers }: IOptions): Promise<IAnswer> {
+    public async AskQuestions({ answers }: IOptions): Promise<inquirer.Answers> {
         const questions = this.Questions({ answers });
 
-        if (questions.length > 0) {
-            const answers = await inquirer.prompt(questions);
-            return answers;
-        }
-
-        return null;
+        const promptAnswers = await inquirer.prompt(questions);
+        return promptAnswers;
     }
 
     /**

@@ -1,3 +1,3 @@
-import { IAdditionalComposition, IAnswer, IDependencyList, IOptions, IQuestion, IQuestionChoice } from "./interfaces";
+import { IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions } from "./interfaces";
 import { RootComposer } from "./rootComposer";
-export { IAdditionalComposition, IAnswer, IDependencyList, IOptions, IQuestion, IQuestionChoice, RootComposer, };
+export { IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions, RootComposer, };

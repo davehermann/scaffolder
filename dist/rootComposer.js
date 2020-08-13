@@ -27,11 +27,8 @@ class RootComposer {
     /** Display any questions for this composer to the user */
     async AskQuestions({ answers }) {
         const questions = this.Questions({ answers });
-        if (questions.length > 0) {
-            const answers = await inquirer.prompt(questions);
-            return answers;
-        }
-        return null;
+        const promptAnswers = await inquirer.prompt(questions);
+        return promptAnswers;
     }
     /**
      * Override to provide configuration settings

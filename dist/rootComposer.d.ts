@@ -1,4 +1,5 @@
-import { IQuestion, IAnswer, IDependencyList, IAdditionalComposition, IOptions } from "./interfaces";
+import * as inquirer from "inquirer";
+import { IDependencyList, IAdditionalComposition, IOptions } from "./interfaces";
 declare abstract class RootComposer {
     readonly subclassDirectory: string;
     /**
@@ -12,9 +13,9 @@ declare abstract class RootComposer {
     /** This composer configures other composers, and does not compose templates */
     passthroughOnly: boolean;
     /** Override to provide questions for the child composer */
-    Questions({ answers }: IOptions): Array<IQuestion>;
+    Questions({ answers }: IOptions): inquirer.QuestionCollection;
     /** Display any questions for this composer to the user */
-    AskQuestions({ answers }: IOptions): Promise<IAnswer>;
+    AskQuestions({ answers }: IOptions): Promise<inquirer.Answers>;
     /**
      * Override to provide configuration settings
      *   - Set **configuration.installDestination** in your main composer to your newly created path

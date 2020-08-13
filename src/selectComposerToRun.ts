@@ -6,14 +6,14 @@ import * as inquirer from "inquirer";
 import { Dev, Trace, Debug } from "multi-level-logger";
 
 // Application Modules
-import { IRegisteredComposer, IQuestion } from "./interfaces";
+import { IRegisteredComposer } from "./interfaces";
 
 /** Get the name of each found composer, and let the user select one */
 async function displayPromptToUser(composerNames: Array<{ name: string, composer: IRegisteredComposer}>) {
     Trace({ composerNames });
 
     // Display as a choice
-    const prompt: Array<IQuestion> = [
+    const prompt: inquirer.QuestionCollection = [
         { type: `list`, name: `selectedComposer`, message: `Available composers`, choices: composerNames.map(c => c.name) }
     ];
 
