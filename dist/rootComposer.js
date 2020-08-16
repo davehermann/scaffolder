@@ -52,6 +52,15 @@ class RootComposer {
             existingTemplates.set(filePath, contents);
         }
     }
+    getPathToTemplate(existingTemplates, filePath, { answers, configuration }) {
+        if (existingTemplates.has(filePath))
+            return filePath;
+        // Pass through InstallPath if the file path isn't found
+        const installPath = this.InstallPath(filePath, { answers, configuration });
+        if (existingTemplates.has(installPath))
+            return installPath;
+        throw new Error(`No template for "${filePath}" or "${installPath}" found`);
+    }
     /**
      * Utility to drop templates
      * @param filesToRemove - file names will be automatically passed through **InstallPath** if not directly in template map
@@ -60,10 +69,7 @@ class RootComposer {
         if (typeof filesToRemove == `string`)
             filesToRemove = [filesToRemove];
         filesToRemove.forEach(filePath => {
-            // Pass through InstallPath if the file path isn't found
-            if (!existingTemplates.has(filePath))
-                filePath = this.InstallPath(filePath, { answers, configuration });
-            existingTemplates.delete(filePath);
+            existingTemplates.delete(this.getPathToTemplate(existingTemplates, filePath, { answers, configuration }));
         });
     }
     getDirectoryFiles(directoryRoot, foundFiles = []) {
@@ -124,6 +130,13 @@ class RootComposer {
                     fileContents = fileContents.replace(fullId, value);
             });
         return fileContents;
+    }
+    ReplaceToken(existingTemplates, templatePath, token, replacement, { answers, configuration }) {
+        const pathInTemplate = this.getPathToTemplate(existingTemplates, templatePath, { answers, configuration });
+        const loadedFileContents = existingTemplates.get(pathInTemplate);
+        const replacementId = new RegExp(`\\$\\$\\$${token}\\$\\$\\$`);
+        const updatedFileContents = loadedFileContents.replace(replacementId, replacement);
+        existingTemplates.set(pathInTemplate, updatedFileContents);
     }
     isBinaryFile(filePath) {
         const extension = path.extname(filePath);

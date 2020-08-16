@@ -66,6 +66,18 @@ abstract class RootComposer {
         }
     }
 
+    private getPathToTemplate(existingTemplates: Map<string, string>, filePath: string, { answers, configuration }: IOptions): string {
+        if (existingTemplates.has(filePath))
+            return filePath;
+
+        // Pass through InstallPath if the file path isn't found
+        const installPath = this.InstallPath(filePath, { answers, configuration });
+        if (existingTemplates.has(installPath))
+            return installPath;
+
+        throw new Error(`No template for "${filePath}" or "${installPath}" found`);
+    }
+
     /**
      * Utility to drop templates
      * @param filesToRemove - file names will be automatically passed through **InstallPath** if not directly in template map
@@ -75,10 +87,7 @@ abstract class RootComposer {
             filesToRemove = [filesToRemove];
 
         filesToRemove.forEach(filePath => {
-            // Pass through InstallPath if the file path isn't found
-            if (!existingTemplates.has(filePath))
-                filePath = this.InstallPath(filePath, { answers, configuration });
-            existingTemplates.delete(filePath);
+            existingTemplates.delete(this.getPathToTemplate(existingTemplates, filePath, { answers, configuration }));
         });
     }
 
@@ -153,6 +162,14 @@ abstract class RootComposer {
             });
 
         return fileContents;
+    }
+
+    protected ReplaceToken(existingTemplates: Map<string, string>, templatePath: string, token: string, replacement: string, { answers, configuration }: IOptions): void {
+        const pathInTemplate = this.getPathToTemplate(existingTemplates, templatePath, { answers, configuration });
+        const loadedFileContents = existingTemplates.get(pathInTemplate);
+        const replacementId = new RegExp(`\\$\\$\\$${token}\\$\\$\\$`);
+        const updatedFileContents = loadedFileContents.replace(replacementId, replacement);
+        existingTemplates.set(pathInTemplate, updatedFileContents);
     }
 
     public isBinaryFile(filePath: string): boolean {

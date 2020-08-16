@@ -63,7 +63,7 @@ async function writeFiles(composer, templateFiles, { configuration }) {
         multi_level_logger_1.Log(`Adding ${relativeFilePath}`, { configuration: { includeCodeLocation: false } });
         // Check the file type
         const isBinaryFile = composer.isBinaryFile(filePath);
-        // Handle as RootComposer handles file reads
+        // Handle as RootComposer handles file reads: from base64
         await fs_1.promises.writeFile(filePath, contents, { encoding: isBinaryFile ? `base64` : `utf8` });
     }
 }
