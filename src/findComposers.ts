@@ -3,7 +3,7 @@ import * as path from "path";
 
 import { Dev, Debug } from "multi-level-logger";
 import { RootComposer } from "./rootComposer";
-import { IRegisteredComposer } from "./interfaces";
+import { IRegisteredComposer, IOptions } from "./interfaces";
 
 async function loadModule(moduleDirectory: string): Promise<any> {
     const modulePath: string = path.join(moduleDirectory, `composer.js`);
@@ -125,7 +125,39 @@ async function readGlobalInstalls(): Promise<Array<IRegisteredComposer>> {
     return composerCandidates;
 }
 
+async function findConfiguration(checkDirectory: string): Promise<IOptions> {
+    Dev({ checkDirectory });
+
+    if (checkDirectory.length > 0) {
+        const fsObjects = await fs.readdir(checkDirectory);
+
+        Dev({ fsObjects });
+
+        if (fsObjects.indexOf(`.scaffolderrc.json`) >= 0) {
+            // Read the file as JSON
+            const contents = await fs.readFile(path.join(checkDirectory, `.scaffolderrc.json`), { encoding: `utf8` });
+            return JSON.parse(contents);
+        } else {
+            // Check one path up
+            const nextPath = path.dirname(checkDirectory);
+            if (nextPath !== checkDirectory)
+                await findConfiguration(nextPath);
+        }
+    }
+
+    return undefined;
+}
+
+async function readPersistentConfiguration(): Promise<IOptions> {
+    // Read up to the root directory to locate a configuration file
+    const existingConfiguration = await findConfiguration(process.cwd());
+    Debug({ existingConfiguration });
+
+    return existingConfiguration;
+}
+
 export {
+    readPersistentConfiguration as GetLocalConfiguration,
     readGlobalInstalls as GloballyInstalledComposers,
     loadNamedComposerForPath as LoadNamedComposer,
 };

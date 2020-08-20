@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LoadNamedComposer = exports.GloballyInstalledComposers = void 0;
+exports.LoadNamedComposer = exports.GloballyInstalledComposers = exports.GetLocalConfiguration = void 0;
 const fs_1 = require("fs");
 const path = require("path");
 const multi_level_logger_1 = require("multi-level-logger");
@@ -96,3 +96,29 @@ async function readGlobalInstalls() {
     return composerCandidates;
 }
 exports.GloballyInstalledComposers = readGlobalInstalls;
+async function findConfiguration(checkDirectory) {
+    multi_level_logger_1.Dev({ checkDirectory });
+    if (checkDirectory.length > 0) {
+        const fsObjects = await fs_1.promises.readdir(checkDirectory);
+        multi_level_logger_1.Dev({ fsObjects });
+        if (fsObjects.indexOf(`.scaffolderrc.json`) >= 0) {
+            // Read the file as JSON
+            const contents = await fs_1.promises.readFile(path.join(checkDirectory, `.scaffolderrc.json`), { encoding: `utf8` });
+            return JSON.parse(contents);
+        }
+        else {
+            // Check one path up
+            const nextPath = path.dirname(checkDirectory);
+            if (nextPath !== checkDirectory)
+                await findConfiguration(nextPath);
+        }
+    }
+    return undefined;
+}
+async function readPersistentConfiguration() {
+    // Read up to the root directory to locate a configuration file
+    const existingConfiguration = await findConfiguration(process.cwd());
+    multi_level_logger_1.Debug({ existingConfiguration });
+    return existingConfiguration;
+}
+exports.GetLocalConfiguration = readPersistentConfiguration;

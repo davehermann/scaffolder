@@ -123,7 +123,7 @@ async function runAnySuccessiveComposers(composer: IRegisteredComposer, { answer
     }
 }
 
-async function scaffolder(composer: IRegisteredComposer, { answers, configuration }: IOptions = { answers: null, configuration: null }): Promise<void> {
+async function scaffolder(composer: IRegisteredComposer, { answers, configuration }: IOptions = { answers: null, configuration: null }, rootComposerName: string = null): Promise<void> {
     Log(`Using "${composer.name}" composer`, { configuration: { includeCodeLocation: false } });
 
     // Prompt for questions
@@ -163,7 +163,7 @@ async function scaffolder(composer: IRegisteredComposer, { answers, configuratio
     let writingConfiguration = false;
     if (!composer._isSubComposer) {
         writingConfiguration = true;
-        await fs.writeFile(path.join(configuration.installDestination, `.scaffolderrc.json`), JSON.stringify({ configuration, answers }, null, 4), { encoding: `utf8` });
+        await fs.writeFile(path.join(configuration.installDestination, `.scaffolderrc.json`), JSON.stringify({ composer: rootComposerName, configuration, answers }, null, 4), { encoding: `utf8` });
         Log(`".scaffolderrc.json" has NOT been committed. Check for passwords or other sensitive data before committing.`, { configuration: { includeCodeLocation: false } });
     }
 

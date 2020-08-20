@@ -15,7 +15,7 @@ async function displayPromptToUser(composerNames) {
     ];
     const answers = await inquirer.prompt(prompt);
     multi_level_logger_1.Debug({ answers });
-    return composerNames.find(cN => (cN.name == answers.selectedComposer)).composer;
+    return answers.selectedComposer;
 }
 /**
  * Get the root path from a sub-composer
@@ -30,7 +30,7 @@ exports.GetComposerRoot = getComposerRoot;
  * Select composer to run either via user input or configuration
  * @param foundComposers - List of "Main" composers found on the system
  */
-async function selectComposerToRun(foundComposers) {
+async function selectComposerToRun(foundComposers, existingConfiguration) {
     // No composer produces an error
     if (foundComposers.length == 0)
         throw `No configured Composers found`;
@@ -40,9 +40,15 @@ async function selectComposerToRun(foundComposers) {
         multi_level_logger_1.Dev({ pathToComposerRoot });
         return { name: path.basename(pathToComposerRoot).replace(/^composer-/, ``), composer };
     });
-    // A configuration file located anywhere up the path tree from the current working directory will auto-select the composer
-    // A parameter used in the CLI command will auto-select the composer
-    const selected = await displayPromptToUser(composerNames);
-    return selected;
+    let selectedComposer;
+    // An environment variable used in the CLI command will auto-select the composer, and override any configuration
+    if (!!process.env.COMPOSER)
+        selectedComposer = process.env.COMPOSER;
+    else if (!!existingConfiguration && !!existingConfiguration.composer)
+        // A configuration file located anywhere up the path tree from the current working directory will auto-select the composer
+        selectedComposer = existingConfiguration.composer;
+    else
+        selectedComposer = await displayPromptToUser(composerNames);
+    return { name: selectedComposer, registeredComposer: composerNames.find(cN => (cN.name == selectedComposer)).composer };
 }
 exports.SelectComposer = selectComposerToRun;

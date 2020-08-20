@@ -12,6 +12,7 @@ interface IDependencyList {
     development: Array<string>;
 }
 interface IOptions {
+    composer?: string;
     answers?: IAnswerCollection;
     configuration?: any;
 }
@@ -26,4 +27,12 @@ interface IRegisteredComposer {
     /** Internal tracking of successive composers */
     _isSubComposer?: boolean;
 }
-export { IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions, IRegisteredComposer, };
+/**
+ * DO NOT EXPORT
+ * @private
+ */
+interface ISelectedComposer {
+    name: string;
+    registeredComposer: IRegisteredComposer;
+}
+export { IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions, IRegisteredComposer, ISelectedComposer, };

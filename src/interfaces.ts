@@ -16,6 +16,7 @@ interface IDependencyList {
 }
 
 interface IOptions {
+    composer?: string;
     answers?: IAnswerCollection;
     configuration?: any;
 }
@@ -32,10 +33,20 @@ interface IRegisteredComposer {
     _isSubComposer?:boolean;
 }
 
+/**
+ * DO NOT EXPORT
+ * @private
+ */
+interface ISelectedComposer {
+    name: string;
+    registeredComposer: IRegisteredComposer;
+}
+
 export {
     IAdditionalComposition,
     IAnswerCollection,
     IDependencyList,
     IOptions,
     IRegisteredComposer,
+    ISelectedComposer,
 };
