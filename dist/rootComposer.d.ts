@@ -12,6 +12,8 @@ declare abstract class RootComposer {
     automaticCommitMessage: string;
     /** This composer configures other composers, and does not compose templates */
     passthroughOnly: boolean;
+    /** Configuration should be persisted to disk when writing initial configuration */
+    persistConfiguration: boolean;
     /** Override to provide questions for the child composer */
     Questions({ answers }: IOptions): inquirer.QuestionCollection;
     /** Display any questions for this composer to the user */

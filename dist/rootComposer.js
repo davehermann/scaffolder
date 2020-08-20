@@ -18,8 +18,10 @@ class RootComposer {
         this.subclassDirectory = subclassDirectory;
         /** This composer configures other composers, and does not compose templates */
         this.passthroughOnly = false;
+        /** Configuration should be persisted to disk when writing initial configuration */
+        this.persistConfiguration = false;
         if (!subclassDirectory)
-            throw `RootComposer requires subclasses to call super(__dirname)`;
+            throw new Error(`RootComposer requires subclasses to call super(__dirname) in their constructor`);
         this.enabled = true;
     }
     /** Override to provide questions for the child composer */

@@ -106,7 +106,19 @@ async function runAnySuccessiveComposers(composer: IRegisteredComposer, { answer
                 for (const prop in data.configuration)
                     configurationCopy[prop] = data.configuration[prop];
 
+            // Specify as a sub-composer
+            peerComposer._isSubComposer = true;
+
             await scaffolder(peerComposer, { answers: answerCopy, configuration: configurationCopy });
+
+            if (peerComposer.composer.persistConfiguration) {
+                // Update the answers and configuration following the composer operation
+                for (const prop in answerCopy)
+                    answers[prop] = answerCopy[prop];
+
+                for (const prop in configurationCopy)
+                    configuration[prop] = configurationCopy[prop];
+            }
         }
     }
 }
@@ -147,10 +159,20 @@ async function scaffolder(composer: IRegisteredComposer, { answers, configuratio
     // Run any additional composers
     await runAnySuccessiveComposers(composer, { answers, configuration });
 
+    // Save the configuration of the top-level composer
+    let writingConfiguration = false;
+    if (!composer._isSubComposer) {
+        writingConfiguration = true;
+        await fs.writeFile(path.join(configuration.installDestination, `.scaffolderrc.json`), JSON.stringify({ configuration, answers }, null, 4), { encoding: `utf8` });
+        Log(`".scaffolderrc.json" has NOT been committed. Check for passwords or other sensitive data before committing.`, { configuration: { includeCodeLocation: false } });
+    }
+
     // Commit to Git source control
     if (!!composer.composer.automaticCommitMessage && RUNTIME_CONFIGURATION.addToGit && !composer.composer.passthroughOnly) {
         await handleChildProcess([`git`, `init`], { answers, configuration });
         await handleChildProcess([`git`, `add`, `.`], { answers, configuration });
+        if (writingConfiguration)
+            await handleChildProcess([`git`, `rm`, `--cached`, `.scaffolderrc.json`], { answers, configuration });
         await handleChildProcess([`git`, `commit`, `-m`, `"${composer.composer.automaticCommitMessage}"`], { answers, configuration });
     }
 }

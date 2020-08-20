@@ -23,5 +23,7 @@ interface IRegisteredComposer {
     name: string;
     path: string;
     composer: RootComposer;
+    /** Internal tracking of successive composers */
+    _isSubComposer?: boolean;
 }
 export { IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions, IRegisteredComposer, };

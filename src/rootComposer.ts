@@ -17,7 +17,7 @@ abstract class RootComposer {
      * @param composerDirectory - Pass in **__dirname** from the composer
      */
     constructor(readonly subclassDirectory: string) {
-        if (!subclassDirectory) throw `RootComposer requires subclasses to call super(__dirname)`;
+        if (!subclassDirectory) throw new Error(`RootComposer requires subclasses to call super(__dirname) in their constructor`);
         this.enabled = true;
     }
 
@@ -29,6 +29,9 @@ abstract class RootComposer {
 
     /** This composer configures other composers, and does not compose templates */
     public passthroughOnly = false;
+
+    /** Configuration should be persisted to disk when writing initial configuration */
+    public persistConfiguration = false;
 
     /** Override to provide questions for the child composer */
     public Questions({ answers }: IOptions): inquirer.QuestionCollection {
