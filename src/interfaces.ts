@@ -21,6 +21,11 @@ interface IOptions {
     configuration?: any;
 }
 
+interface IPostInstallTask {
+    cliCommand: string | Array<string>;
+    requiresDependencies?: boolean;
+}
+
 /**
  * DO NOT EXPORT
  * @private
@@ -47,6 +52,7 @@ export {
     IAnswerCollection,
     IDependencyList,
     IOptions,
+    IPostInstallTask,
     IRegisteredComposer,
     ISelectedComposer,
 };

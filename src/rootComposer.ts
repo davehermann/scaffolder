@@ -10,7 +10,7 @@ import textExtensions from "textextensions";
 import binaryExtensions from "binaryextensions";
 
 // Application Modules
-import { IDependencyList, IAdditionalComposition, IOptions } from "./interfaces";
+import { IDependencyList, IAdditionalComposition, IOptions, IPostInstallTask } from "./interfaces";
 
 abstract class RootComposer {
     /**
@@ -232,6 +232,10 @@ abstract class RootComposer {
 
     public InstallDependencies({ answers, configuration }: IOptions): IDependencyList {
         return { runtime: null, development: null };
+    }
+
+    public PostInstallTasks({ answers, configuration }: IOptions): Array<IPostInstallTask> {
+        return [];
     }
 
     public AdditionalCompositions({ answers, configuration }: IOptions): Array<IAdditionalComposition> {

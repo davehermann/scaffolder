@@ -1,5 +1,5 @@
 import * as inquirer from "inquirer";
-import { IDependencyList, IAdditionalComposition, IOptions } from "./interfaces";
+import { IDependencyList, IAdditionalComposition, IOptions, IPostInstallTask } from "./interfaces";
 declare abstract class RootComposer {
     readonly subclassDirectory: string;
     /**
@@ -40,6 +40,7 @@ declare abstract class RootComposer {
     /** Modify loaded templates, and load/remove from templates */
     TemplateFileAdjustments(existingTemplates: Map<string, string>, { answers, configuration }: IOptions): Promise<void>;
     InstallDependencies({ answers, configuration }: IOptions): IDependencyList;
+    PostInstallTasks({ answers, configuration }: IOptions): Array<IPostInstallTask>;
     AdditionalCompositions({ answers, configuration }: IOptions): Array<IAdditionalComposition>;
 }
 export { RootComposer, };

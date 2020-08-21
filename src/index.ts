@@ -1,7 +1,7 @@
-import { IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions } from "./interfaces";
+import { IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions, IPostInstallTask } from "./interfaces";
 import { RootComposer } from "./rootComposer";
 
 export {
-    IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions,
+    IAdditionalComposition, IAnswerCollection, IDependencyList, IOptions, IPostInstallTask,
     RootComposer,
 };

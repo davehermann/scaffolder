@@ -182,6 +182,9 @@ class RootComposer {
     InstallDependencies({ answers, configuration }) {
         return { runtime: null, development: null };
     }
+    PostInstallTasks({ answers, configuration }) {
+        return [];
+    }
     AdditionalCompositions({ answers, configuration }) {
         return [];
     }

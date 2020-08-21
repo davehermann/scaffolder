@@ -67,6 +67,17 @@ async function writeFiles(composer, templateFiles, { configuration }) {
         await fs_1.promises.writeFile(filePath, contents, { encoding: isBinaryFile ? `base64` : `utf8` });
     }
 }
+async function postInstallTasks(composer, { answers, configuration }) {
+    const taskList = composer.composer.PostInstallTasks({ answers, configuration });
+    if (taskList.length > 0)
+        multi_level_logger_1.Log(`Running post-dependency-install tasks: ${taskList.length} total`, { configuration: { includeCodeLocation: false } });
+    while (taskList.length > 0) {
+        const nextTask = taskList.shift();
+        multi_level_logger_1.Log(nextTask.cliCommand, { configuration: { includeCodeLocation: false } });
+        if (!nextTask.requiresDependencies || RUNTIME_CONFIGURATION.installDependencies)
+            await handleChildProcess(nextTask.cliCommand, { answers, configuration });
+    }
+}
 async function runAnySuccessiveComposers(composer, { answers, configuration }) {
     const additionalComposers = composer.composer.AdditionalCompositions({ answers, configuration });
     if (additionalComposers.length > 0) {
@@ -123,6 +134,8 @@ async function scaffolder(composer, { answers, configuration } = { answers: null
         await writeFiles(composer.composer, composerTemplates, { configuration });
         // Install dependencies
         await dependencyInstallation(composer.composer, { answers, configuration });
+        // Run any post-install tasks for the composer
+        await postInstallTasks(composer, { answers, configuration });
     }
     // Run any additional composers
     await runAnySuccessiveComposers(composer, { answers, configuration });

@@ -18,7 +18,7 @@ const RUNTIME_CONFIGURATION = {
     addToGit: (process.env.NO_GIT === undefined ? true : (process.env.NO_GIT !== `true`)),
 };
 
-async function handleChildProcess(commands: Array<string>, { answers, configuration }: IOptions): Promise<string> {
+async function handleChildProcess(commands: string | Array<string>, { answers, configuration }: IOptions): Promise<string> {
     const spawnedProcess = await SpawnProcess(commands, { cwd: configuration.installDestination }, { consolePassthrough: true });
 
     const data: Promise<string> = new Promise((resolve, reject) => {
@@ -78,6 +78,22 @@ async function writeFiles(composer: RootComposer, templateFiles: Map<string, str
         const isBinaryFile = composer.isBinaryFile(filePath);
         // Handle as RootComposer handles file reads: from base64
         await fs.writeFile(filePath, contents, { encoding: isBinaryFile ? `base64` : `utf8` });
+    }
+}
+
+async function postInstallTasks(composer: IRegisteredComposer, { answers, configuration }: IOptions): Promise<void> {
+    const taskList = composer.composer.PostInstallTasks({ answers, configuration });
+
+    if (taskList.length > 0)
+        Log(`Running post-dependency-install tasks: ${taskList.length} total`, { configuration: { includeCodeLocation: false } });
+
+    while (taskList.length > 0) {
+        const nextTask = taskList.shift();
+
+        Log(nextTask.cliCommand, { configuration: { includeCodeLocation: false } });
+
+        if (!nextTask.requiresDependencies || RUNTIME_CONFIGURATION.installDependencies)
+            await handleChildProcess(nextTask.cliCommand, { answers, configuration });
     }
 }
 
@@ -154,6 +170,9 @@ async function scaffolder(composer: IRegisteredComposer, { answers, configuratio
 
         // Install dependencies
         await dependencyInstallation(composer.composer, { answers, configuration });
+
+        // Run any post-install tasks for the composer
+        await postInstallTasks(composer, { answers, configuration });
     }
 
     // Run any additional composers
