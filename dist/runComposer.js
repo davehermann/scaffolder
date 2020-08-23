@@ -95,6 +95,7 @@ async function runAnySuccessiveComposers(composer, { answers, configuration }) {
             if (!!(data === null || data === void 0 ? void 0 : data.configuration))
                 for (const prop in data.configuration)
                     configurationCopy[prop] = data.configuration[prop];
+            multi_level_logger_1.Dev({ answerCopy, configurationCopy });
             // Specify as a sub-composer
             peerComposer._isSubComposer = true;
             await scaffolder(peerComposer, { answers: answerCopy, configuration: configurationCopy });

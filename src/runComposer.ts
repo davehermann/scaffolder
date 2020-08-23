@@ -5,7 +5,7 @@ import * as path from "path";
 // NPM Modules
 import { EnsurePathForFile } from "@davehermann/fs-utilities";
 import { SpawnProcess } from "@davehermann/process-spawner";
-import { Debug, Log } from "multi-level-logger";
+import { Debug, Log, Dev } from "multi-level-logger";
 
 // Application Modules
 import { IOptions, IRegisteredComposer } from "./interfaces";
@@ -121,6 +121,8 @@ async function runAnySuccessiveComposers(composer: IRegisteredComposer, { answer
             if (!!data?.configuration)
                 for (const prop in data.configuration)
                     configurationCopy[prop] = data.configuration[prop];
+
+            Dev({ answerCopy, configurationCopy });
 
             // Specify as a sub-composer
             peerComposer._isSubComposer = true;
