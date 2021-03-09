@@ -4,6 +4,7 @@
   "description": "Scaffold an app to a folder",
   "main": "./dist/index.js",
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc",
     "app": "node ./dist/app.js"
   },
