@@ -190,7 +190,7 @@ async function scaffolder(composer: IRegisteredComposer, { answers, configuratio
 
     // Commit to Git source control
     if (!!composer.composer.automaticCommitMessage && RUNTIME_CONFIGURATION.addToGit && !composer.composer.passthroughOnly) {
-        await handleChildProcess([`git`, `init`], { answers, configuration });
+        await handleChildProcess([`git`, `init`, `--initial-branch=main`], { answers, configuration });
         await handleChildProcess([`git`, `add`, `.`], { answers, configuration });
         if (writingConfiguration)
             await handleChildProcess([`git`, `rm`, `--cached`, `.scaffolderrc.json`], { answers, configuration });
