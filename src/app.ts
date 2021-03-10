@@ -7,11 +7,14 @@ import { Err, Dev } from "multi-level-logger";
 import { GloballyInstalledComposers, GetLocalConfiguration } from "./findComposers";
 import { RunComposer } from "./runComposer";
 import { SelectComposer } from "./selectComposerToRun";
+import { DisplayOptions } from "./runtimeOptions";
 
 
 async function initialize() {
     const existingConfiguration = await GetLocalConfiguration();
     const foundComposers = await GloballyInstalledComposers();
+
+    DisplayOptions();
 
     const composerToRun = await SelectComposer(foundComposers, existingConfiguration);
     Dev({ composerToRun });

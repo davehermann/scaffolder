@@ -12,11 +12,7 @@ import { IOptions, IRegisteredComposer } from "./interfaces";
 import { RootComposer } from "./rootComposer";
 import { LoadNamedComposer } from "./findComposers";
 import { GetComposerRoot } from "./selectComposerToRun";
-
-const RUNTIME_CONFIGURATION = {
-    installDependencies: (process.env.NO_NPM === undefined ? true : (process.env.NO_NPM !== `true`)),
-    addToGit: (process.env.NO_GIT === undefined ? true : (process.env.NO_GIT !== `true`)),
-};
+import { INSTALL_DEPENDENCIES, ADD_TO_GIT } from "./runtimeOptions";
 
 async function handleChildProcess(commands: string | Array<string>, { answers, configuration }: IOptions): Promise<string> {
     const spawnedProcess = await SpawnProcess(commands, { cwd: configuration.installDestination }, { consolePassthrough: true });
@@ -50,7 +46,7 @@ async function handleChildProcess(commands: string | Array<string>, { answers, c
 }
 
 async function dependencyInstallation(composer: RootComposer, { answers, configuration }: IOptions): Promise<void> {
-    if (RUNTIME_CONFIGURATION.installDependencies) {
+    if (INSTALL_DEPENDENCIES) {
         const { runtime, development } = composer.InstallDependencies({ answers, configuration });
 
         if (!!runtime || !!development)
@@ -92,7 +88,7 @@ async function postInstallTasks(composer: IRegisteredComposer, { answers, config
 
         Log(nextTask.cliCommand, { configuration: { includeCodeLocation: false } });
 
-        if (!nextTask.requiresDependencies || RUNTIME_CONFIGURATION.installDependencies)
+        if (!nextTask.requiresDependencies || INSTALL_DEPENDENCIES)
             await handleChildProcess(nextTask.cliCommand, { answers, configuration });
     }
 }
@@ -189,7 +185,7 @@ async function scaffolder(composer: IRegisteredComposer, { answers, configuratio
     }
 
     // Commit to Git source control
-    if (!!composer.composer.automaticCommitMessage && RUNTIME_CONFIGURATION.addToGit && !composer.composer.passthroughOnly) {
+    if (!!composer.composer.automaticCommitMessage && ADD_TO_GIT && !composer.composer.passthroughOnly) {
         await handleChildProcess([`git`, `init`, `--initial-branch=main`], { answers, configuration });
         await handleChildProcess([`git`, `add`, `.`], { answers, configuration });
         if (writingConfiguration)
